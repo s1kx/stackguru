@@ -1,0 +1,18 @@
+hash: 339b29e053bbe5781a766e1440e75a5748e07f2afcc75915d86ec52f204fadf9
+updated: 2017-03-22T13:14:41.109810679-07:00
+imports:
+- name: github.com/BurntSushi/toml
+  version: bbd5bb678321a0d6e58f1099321dfa73391c1b6f
+- name: github.com/s1kx/armorykit
+  version: b4c4b88e9e1140866e21a7adb077603fea3a2be3
+  subpackages:
+  - config
+- name: github.com/Sirupsen/logrus
+  version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
+- name: github.com/urfave/cli
+  version: 04b2f4ff79cf1fd71e138bafc67df8bbdb5b81c2
+- name: golang.org/x/sys
+  version: 99f16d856c9836c42d24e7ab64ea72916925fa97
+  subpackages:
+  - unix
+testImports: []
