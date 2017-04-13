@@ -10,7 +10,9 @@ import (
 
 	"bitbucket.org/stackguru/stackguru-go/config"
 	"bitbucket.org/stackguru/stackguru-go/core"
+	"bitbucket.org/stackguru/stackguru-go/core/events"
 	"bitbucket.org/stackguru/stackguru-go/guru/cmd"
+	"bitbucket.org/stackguru/stackguru-go/guru/hook"
 	"bitbucket.org/stackguru/stackguru-go/version"
 )
 
@@ -106,9 +108,26 @@ func runApplication(c *cli.Context) error {
 	// Create bot structure
 	bot := &core.Bot{
 		Commands: map[string]*core.Command{
-			"echo": cmd.EchoCommand,
+			cmd.EchoCommand.Name: cmd.EchoCommand,
+		},
+
+		Hooks: map[string]*core.Hook{
+			hook.ChatlogHook.Name: hook.ChatlogHook,
+		},
+		
+		HookEvents: map[string] []string{
+			events.MessageCreate: []string{},
 		},
 	}
+
+	// generate a view over events that can be fired and what hooks to be triggered
+	// crashes if a event type is missing from bot.HookEvents
+	for name, hook := range bot.Hooks {
+		for _, event := range hook.Events {
+			bot.HookEvents[event] = append(bot.HookEvents[event], name)
+		}
+	}	
+
 
 	// Start the bot
 	err := bot.Run(conf.Discord.Token)

@@ -6,11 +6,14 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
+	"bitbucket.org/stackguru/stackguru-go/core/events"
 )
 
 // Bot is the definition of the chat bot.
 type Bot struct {
 	Commands map[string]*Command
+	Hooks map[string]*Hook
+	HookEvents map[string] []string
 }
 
 func (b *Bot) Run(token string) error {
@@ -88,6 +91,6 @@ func (bs *BotSession) addHandlers() {
 
 	// Add command handler
 	bs.discord.AddHandler(func(ds *discordgo.Session, m *discordgo.MessageCreate) {
-		handleMessageCreate(ctx, ds, m)
+		handleMessageCreate(ctx, events.MessageCreate, ds, m)
 	})
 }

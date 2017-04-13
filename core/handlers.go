@@ -7,7 +7,10 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func handleMessageCreate(ctx *Context, ds *discordgo.Session, m *discordgo.MessageCreate) {
+func handleMessageCreate(ctx *Context, event string, ds *discordgo.Session, m *discordgo.MessageCreate) {
+
+	runEventHook(event, ctx, ds, m)
+
 	request := m.Content
 
 	// Don't communicate with other bots
@@ -51,4 +54,12 @@ func handleMessageCreate(ctx *Context, ds *discordgo.Session, m *discordgo.Messa
 func cleanUpRequest(str, remove string) string {
 	result := strings.TrimPrefix(str, remove)
 	return strings.TrimSpace(result)
+}
+
+// To run a hook.
+// This needs to be updated to handle multiple different event types... should be somewhat of a generic, but will work for now........
+func runEventHook(event string, ctx *Context, ds *discordgo.Session, m *discordgo.MessageCreate) {
+	for _, name := range ctx.Bot.HookEvents[event] {
+		ctx.Bot.Hooks[name].Action(ctx, event, ds, m.Message)
+	}
 }
