@@ -102,10 +102,11 @@ func initApplication(c *cli.Context) error {
 }
 
 func runApplication(c *cli.Context) error {
+
 	// Create bot structure
 	bot := &core.Bot{
-		Commands: []*core.Command{
-			cmd.EchoCommand,
+		Commands: map[string]*core.Command{
+			"echo": cmd.EchoCommand,
 		},
 	}
 

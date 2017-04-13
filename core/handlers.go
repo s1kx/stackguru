@@ -8,30 +8,47 @@ import (
 )
 
 func handleMessageCreate(ctx *Context, ds *discordgo.Session, m *discordgo.MessageCreate) {
-	// Avoid talking to myself and other bots
-	if m.Author.Bot || m.Author.ID == ctx.User.ID {
-		return
-	}
-	// Check if message is a command
-	if !strings.HasPrefix(m.Content, CommandPrefix) {
+	request := m.Content
+
+	// Don't communicate with other bots
+	if m.Author.Bot {
 		return
 	}
 
+	// Don't communicate with myself
+	if m.Author.ID == ctx.User.ID {
+		return
+	}
+
+	// Check if message is a command
+	if !strings.HasPrefix(request, CommandPrefix) {
+		return
+	}
+
+	// Update the request
+	request = cleanUpRequest(request, CommandPrefix)
+
 	// Find command, if exists
-	// TODO: Optimize, possibly with a map
-	for _, cmd := range ctx.Bot.Commands {
-		prefix := CommandPrefix + cmd.Name
-		if !strings.HasPrefix(m.Content, prefix) {
+	for title, _ := range ctx.Bot.Commands {
+		if !strings.HasPrefix(request, title) {
 			continue
 		}
 
-		// Trim command from content
-		content := strings.TrimPrefix(m.Content, prefix)
+		request = cleanUpRequest(request, title)
 
 		// Invoke command
-		err := cmd.Action(ctx, ds, m.Message, content)
+		err := ctx.Bot.Commands[title].Action(ctx, ds, m.Message, request)
 		if err != nil {
-			logrus.Errorf("Command [%s]: %s", cmd.Name, err)
+			logrus.Errorf("Command [%s]: %s", title, err)
 		}
+
+		// command was found, stop looping
+		break
 	}
+}
+
+// Removes a substring from the string and cleans up leading & trailing spaces.
+func cleanUpRequest(str, remove string) string {
+	result := strings.TrimPrefix(str, remove)
+	return strings.TrimSpace(result)
 }

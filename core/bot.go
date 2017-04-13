@@ -10,7 +10,7 @@ import (
 
 // Bot is the definition of the chat bot.
 type Bot struct {
-	Commands []*Command
+	Commands map[string]*Command
 }
 
 func (b *Bot) Run(token string) error {
@@ -57,6 +57,7 @@ func (bs *BotSession) Run() error {
 
 			logrus.WithField("ID", r.User.ID).Infof("I have finally found myself.")
 
+			//bs.loadCommands()
 			bs.addHandlers()
 		})
 	}
