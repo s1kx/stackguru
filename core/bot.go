@@ -6,67 +6,91 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
-	"bitbucket.org/stackguru/stackguru-go/core/events"
 )
 
-// Bot is the definition of the chat bot.
-type Bot struct {
-	Commands map[string]*Command
-	Hooks map[string]*Hook
-	HookEvents map[string] []string
+// BotSettings contains the definition of bot behavior.
+// It is used for creating the actual bot.
+type BotSettings struct {
+	Token string
+
+	Commands   []*Command
+	EventHooks []*EventHook
 }
 
-func (b *Bot) Run(token string) error {
+func RunBot(settings *BotSettings) error {
 	// TODO: Validate commands
 
 	// discordgo requires "Bot " prefix for Bot applications
+	token := settings.Token
 	if !strings.HasPrefix(token, "Bot ") {
 		token = "Bot " + token
 	}
 
 	// Initialize discord client
-	discord, err := discordgo.New(token)
+	ds, err := discordgo.New(token)
 	if err != nil {
 		return err
 	}
 
-	// Start bot
-	session := &BotSession{
-		bot: b,
-
-		discord: discord,
+	// Initialize and start bot
+	bot, err := newBot(settings, ds)
+	if err != nil {
+		return err
 	}
-	session.Run()
+	bot.Run()
 
 	return nil
 }
 
-// BotSession is an active bot session.
-type BotSession struct {
-	bot     *Bot
-	discord *discordgo.Session
+// Bot is an active bot session.
+type Bot struct {
+	*BotSettings
+	Discord *discordgo.Session
+
+	// Lookup map for name/alias => command
+	commandMap map[string]*Command
+	// Lookup map for name => hook
+	eventHookMap map[string]*EventHook
 
 	readyState *discordgo.Ready
-	user       *discordgo.User
+	User       *discordgo.User
 }
 
-func (bs *BotSession) Run() error {
-	// Add Handlers
-	{
-		// Listen for ready state to receive bot information
-		bs.discord.AddHandler(func(ds *discordgo.Session, r *discordgo.Ready) {
-			bs.readyState = r
-			bs.user = r.User
+func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
+	// Initialize bot
+	bot := &Bot{
+		BotSettings: settings,
+		Discord:     ds,
 
-			logrus.WithField("ID", r.User.ID).Infof("I have finally found myself.")
-
-			//bs.loadCommands()
-			bs.addHandlers()
-		})
+		commandMap:   make(map[string]*Command),
+		eventHookMap: make(map[string]*EventHook),
 	}
 
+	// Register commands
+	for _, cmd := range bot.Commands {
+		err := bot.RegisterCommand(cmd)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Register event hooks
+	for _, hook := range bot.EventHooks {
+		err := bot.RegisterEventHook(hook)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return bot, nil
+}
+
+func (bot *Bot) Run() error {
+	// Add handler to wait for ready state in order to initialize the bot fully.
+	bot.Discord.AddHandler(bot.onReady)
+
 	// Open the websocket and begin listening.
-	err := bs.discord.Open()
+	err := bot.Discord.Open()
 	if err != nil {
 		return fmt.Errorf("error opening connection: %s", err)
 	}
@@ -80,17 +104,49 @@ func (bs *BotSession) Run() error {
 	return nil
 }
 
-func (bs *BotSession) addHandlers() {
-	// Create context for handlers
-	ctx := &Context{
-		Bot:        bs.bot,
-		BotSession: bs,
-
-		User: bs.user,
+func (bot *Bot) RegisterCommand(cmd *Command) error {
+	name := cmd.Name
+	if ex, exists := bot.commandMap[name]; exists {
+		return &DuplicateCommandError{Existing: ex, New: cmd, Name: name}
 	}
+	bot.commandMap[name] = cmd
+
+	// TODO: Register aliases
+
+	return nil
+}
+
+func (bot *Bot) RegisterEventHook(hook *EventHook) error {
+	name := hook.Name
+	if ex, exists := bot.eventHookMap[name]; exists {
+		return &DuplicateEventHookError{Existing: ex, New: hook}
+	}
+	bot.eventHookMap[name] = hook
+
+	return nil
+}
+
+func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
+	// Set bot state
+	bot.readyState = r
+	bot.User = r.User
+
+	logrus.WithFields(logrus.Fields{
+		"ID":       r.User.ID,
+		"Username": r.User.Username,
+	}).Infof("Bot is connected and running.")
+
+	// Create context for handlers
+	ctx := NewContext(bot)
 
 	// Add command handler
-	bs.discord.AddHandler(func(ds *discordgo.Session, m *discordgo.MessageCreate) {
-		handleMessageCreate(ctx, events.MessageCreate, ds, m)
+	bot.Discord.AddHandler(func(ds *discordgo.Session, m *discordgo.MessageCreate) {
+		handleMessageCreate(ctx, ds, m)
+	})
+
+	// Add generic handler for event hooks
+	// Add command handler
+	bot.Discord.AddHandler(func(ds *discordgo.Session, event interface{}) {
+		handleDiscordEvent(ctx, ds, event)
 	})
 }
