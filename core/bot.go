@@ -13,7 +13,7 @@ type Bot struct {
 	Commands []*Command
 }
 
-func (b Bot) Run(token string) error {
+func (b *Bot) Run(token string) error {
 	// TODO: Validate commands
 
 	// discordgo requires "Bot " prefix for Bot applications
@@ -40,7 +40,7 @@ func (b Bot) Run(token string) error {
 
 // BotSession is an active bot session.
 type BotSession struct {
-	bot     Bot
+	bot     *Bot
 	discord *discordgo.Session
 
 	readyState *discordgo.Ready
@@ -56,37 +56,8 @@ func (bs *BotSession) Run() error {
 			bs.user = r.User
 
 			logrus.WithField("ID", r.User.ID).Infof("I have finally found myself.")
-		})
 
-		// Create context for handlers
-		ctx := &Context{
-			BotSession: bs,
-		}
-
-		// Add handler for commands
-		bs.discord.AddHandler(func(ds *discordgo.Session, m *discordgo.MessageCreate) {
-			// Check if message is a command
-			if !strings.HasPrefix(m.Content, CommandPrefix) {
-				return
-			}
-
-			// Find command, if exists
-			// TODO: Optimize, possibly with a map
-			for _, cmd := range bs.bot.Commands {
-				prefix := CommandPrefix + cmd.Name
-				if !strings.HasPrefix(m.Content, prefix) {
-					continue
-				}
-
-				// Trim command from content
-				content := strings.TrimPrefix(m.Content, prefix)
-
-				// Invoke command
-				err := cmd.Action(ctx, ds, m.Message, content)
-				if err != nil {
-					logrus.Errorf("Command [%s]: %s", cmd.Name, err)
-				}
-			}
+			bs.addHandlers()
 		})
 	}
 
@@ -103,4 +74,19 @@ func (bs *BotSession) Run() error {
 	<-make(chan struct{})
 
 	return nil
+}
+
+func (bs *BotSession) addHandlers() {
+	// Create context for handlers
+	ctx := &Context{
+		Bot:        bs.bot,
+		BotSession: bs,
+
+		User: bs.user,
+	}
+
+	// Add command handler
+	bs.discord.AddHandler(func(ds *discordgo.Session, m *discordgo.MessageCreate) {
+		handleMessageCreate(ctx, ds, m)
+	})
 }
