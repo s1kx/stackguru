@@ -6,3 +6,5 @@ import:
   version: ^0.11.5
 - package: github.com/BurntSushi/toml
   version: ^v0.2.0
+- package: github.com/bwmarrin/discordgo
+  version: ^v0.15.0

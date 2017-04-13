@@ -9,11 +9,16 @@ import (
 	"github.com/urfave/cli"
 
 	"bitbucket.org/stackguru/stackguru-go/config"
+	"bitbucket.org/stackguru/stackguru-go/core"
+	"bitbucket.org/stackguru/stackguru-go/guru/cmd"
 	"bitbucket.org/stackguru/stackguru-go/version"
 )
 
 const (
-	defaultDataDir = "~/.config/stackguru/"
+	defaultConfigPath = "~/.config/stackguru.toml"
+
+	// EnvVarPrefix is the prefix for environment variables
+	EnvVarPrefix = "STACKGURU"
 )
 
 var (
@@ -21,12 +26,7 @@ var (
 	Version string
 )
 
-const (
-	// EnvVarPrefix is the prefix for environment variables
-	EnvVarPrefix = "STACKGURU"
-)
-
-// conf is a local package variable for access to the config from all commands
+// conf is a local package variable for access to the config from all cli commands
 var conf config.Config
 
 func main() {
@@ -43,8 +43,8 @@ func main() {
 				Name:    "config",
 				Aliases: []string{"c"},
 				EnvVars: envVarNames("CONFIG"),
-				Value:   defaultDataDir,
-				Usage:   "path to configuration `directory`",
+				Value:   defaultConfigPath,
+				Usage:   "path to configuration (toml format)",
 			},
 			&cli.BoolFlag{
 				Name:    "debug",
@@ -94,6 +94,7 @@ func initApplication(c *cli.Context) error {
 	// Load configuration in to package variable conf.
 	err := config.Load(configPath, &conf)
 	if err != nil {
+		logrus.Fatalf("Error loading configuration: %s", err)
 		return err
 	}
 
@@ -101,7 +102,18 @@ func initApplication(c *cli.Context) error {
 }
 
 func runApplication(c *cli.Context) error {
-	logrus.Info("Hello world!")
+	// Create bot structure
+	bot := &core.Bot{
+		Commands: []*core.Command{
+			cmd.EchoCommand,
+		},
+	}
+
+	// Start the bot
+	err := bot.Run(conf.Discord.Token)
+	if err != nil {
+		logrus.Error(err)
+	}
 
 	return nil
 }

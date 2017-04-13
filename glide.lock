@@ -1,16 +1,22 @@
-hash: 339b29e053bbe5781a766e1440e75a5748e07f2afcc75915d86ec52f204fadf9
-updated: 2017-03-22T13:14:41.109810679-07:00
+hash: f4e41ed00112edd3ef0c438f918291e48ae570715f212bcc494c5bd290b1680a
+updated: 2017-04-12T21:56:18.340368929-07:00
 imports:
 - name: github.com/BurntSushi/toml
-  version: bbd5bb678321a0d6e58f1099321dfa73391c1b6f
-- name: github.com/s1kx/armorykit
-  version: b4c4b88e9e1140866e21a7adb077603fea3a2be3
-  subpackages:
-  - config
+  version: b26d9c308763d68093482582cea63d69be07a0f0
+- name: github.com/bwmarrin/discordgo
+  version: 5835676872d7fa65ee37b32672079c4ede2c1855
+- name: github.com/gorilla/websocket
+  version: a91eba7f97777409bc2c443f5534d41dd20c5720
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: github.com/urfave/cli
   version: 04b2f4ff79cf1fd71e138bafc67df8bbdb5b81c2
+- name: golang.org/x/crypto
+  version: cd11541cdfcb6d51d1d78f27d596cf7bdff346f7
+  subpackages:
+  - nacl/secretbox
+  - poly1305
+  - salsa20/salsa
 - name: golang.org/x/sys
   version: 99f16d856c9836c42d24e7ab64ea72916925fa97
   subpackages:

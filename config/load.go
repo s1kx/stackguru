@@ -7,10 +7,12 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-// Load loads the configuration from the given path.
+// Load loads the configuration from the given file path.
 func Load(path string, conf *Config) error {
 	path = expandUserHomePath(path)
+
 	_, err := toml.DecodeFile(path, &conf)
+
 	return err
 }
 

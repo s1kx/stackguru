@@ -1,4 +1,4 @@
-APPNAME := stackguru-go
+APPNAME := stackguru
 
 DESTDIR ?= /usr/local
 
