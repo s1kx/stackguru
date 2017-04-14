@@ -14,11 +14,11 @@ var EchoCommand = &unison.Command{
 	Action:      echoAction,
 }
 
-func echoAction(ctx *unison.Context, ds *discordgo.Session, m *discordgo.Message, content string) error {
+func echoAction(ctx *unison.Context, m *discordgo.Message, content string) error {
 	// Send same message back to user
 	response := fmt.Sprintf("<@%s>: %s", m.Author.ID, content)
 
-	_, err := ds.ChannelMessageSend(m.ChannelID, response)
+	_, err := ctx.Discord.ChannelMessageSend(m.ChannelID, response)
 
 	return err
 }
