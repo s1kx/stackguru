@@ -1,4 +1,4 @@
-package: bitbucket.org/stackguru/stackguru-go
+package: github.com/s1kx/stackguru
 import:
 - package: github.com/urfave/cli
   version: ^v2
@@ -6,5 +6,4 @@ import:
   version: ^0.11.5
 - package: github.com/BurntSushi/toml
   version: ^v0.2.0
-- package: github.com/bwmarrin/discordgo
-  version: ^v0.15.0
+- package: github.com/s1kx/unison

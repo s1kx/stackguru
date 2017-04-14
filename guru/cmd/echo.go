@@ -4,18 +4,17 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-
-	"bitbucket.org/stackguru/stackguru-go/core"
+	"github.com/s1kx/unison"
 )
 
 // EchoCommand responds with the message it receives
-var EchoCommand = &core.Command{
+var EchoCommand = &unison.Command{
 	Name:        "echo",
 	Description: "what you say to me, i say to you.",
 	Action:      echoAction,
 }
 
-func echoAction(ctx *core.Context, ds *discordgo.Session, m *discordgo.Message, content string) error {
+func echoAction(ctx *unison.Context, ds *discordgo.Session, m *discordgo.Message, content string) error {
 	// Send same message back to user
 	response := fmt.Sprintf("<@%s>: %s", m.Author.ID, content)
 

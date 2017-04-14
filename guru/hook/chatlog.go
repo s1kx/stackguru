@@ -4,19 +4,19 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
 
-	"bitbucket.org/stackguru/stackguru-go/core"
+	"github.com/s1kx/unison"
 )
 
-var ChatlogHook = &core.EventHook{
+var ChatlogHook = &unison.EventHook{
 	Name:        "chatlog",
 	Description: "Logs messages in given channels to support reviewing them later.",
 	// Events: []string{
 	// 	events.MessageCreate,
 	// },
-	OnEvent: chatlogAction,
+	OnEvent: unison.EventHandlerFunc(chatlogAction),
 }
 
-func chatlogAction(ctx *core.Context, ds *discordgo.Session, event interface{}) (bool, error) {
+func chatlogAction(ctx *unison.Context, ds *discordgo.Session, event interface{}) (bool, error) {
 	var m *discordgo.Message
 
 	// Check event type

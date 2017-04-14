@@ -8,11 +8,9 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
 
-	"bitbucket.org/stackguru/stackguru-go/config"
-	"bitbucket.org/stackguru/stackguru-go/core"
-	"bitbucket.org/stackguru/stackguru-go/guru/cmd"
-	"bitbucket.org/stackguru/stackguru-go/guru/hook"
-	"bitbucket.org/stackguru/stackguru-go/version"
+	"github.com/s1kx/stackguru/config"
+	"github.com/s1kx/stackguru/guru"
+	"github.com/s1kx/stackguru/version"
 )
 
 const (
@@ -103,23 +101,7 @@ func initApplication(c *cli.Context) error {
 }
 
 func runApplication(c *cli.Context) error {
-
-	// Create bot structure
-	settings := &core.BotSettings{
-		Token: conf.Discord.Token,
-		Commands: []*core.Command{
-			cmd.EchoCommand,
-		},
-		EventHooks: []*core.EventHook{
-			hook.ChatlogHook,
-		},
-	}
-
-	// Start the bot
-	err := core.RunBot(settings)
-	if err != nil {
-		logrus.Error(err)
-	}
+	guru.RunBot(&conf)
 
 	return nil
 }

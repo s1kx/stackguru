@@ -1,5 +1,5 @@
-hash: f4e41ed00112edd3ef0c438f918291e48ae570715f212bcc494c5bd290b1680a
-updated: 2017-04-12T21:56:18.340368929-07:00
+hash: a47d45afe71d1dbe18cff63552c52642786155744f46ce466d555994126bf807
+updated: 2017-04-13T18:22:18.948406094-07:00
 imports:
 - name: github.com/BurntSushi/toml
   version: b26d9c308763d68093482582cea63d69be07a0f0
@@ -7,12 +7,14 @@ imports:
   version: 5835676872d7fa65ee37b32672079c4ede2c1855
 - name: github.com/gorilla/websocket
   version: a91eba7f97777409bc2c443f5534d41dd20c5720
+- name: github.com/s1kx/unison
+  version: 0d6a3c3c86ccdbf7b8678df6254b2b0c97b46e24
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: github.com/urfave/cli
   version: 04b2f4ff79cf1fd71e138bafc67df8bbdb5b81c2
 - name: golang.org/x/crypto
-  version: cd11541cdfcb6d51d1d78f27d596cf7bdff346f7
+  version: cbc3d0884eac986df6e78a039b8792e869bff863
   subpackages:
   - nacl/secretbox
   - poly1305
